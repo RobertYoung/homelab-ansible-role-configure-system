@@ -1,0 +1,14 @@
+---
+# Hostname configuration (required)
+# configure_system_hostname: myhostname
+
+# Whether to reboot after package updates if required
+configure_system_reboot_after_update: true
+
+# Log rotation and journal settings
+configure_system_log_retention_days: 30
+configure_system_journal_retention_days: 30
+configure_system_logrotate_rotate_count: 10
+configure_system_docker_log_max_size: "100m"
+configure_system_docker_log_max_file: "3"
+configure_system_tmp_cleanup_days: 30

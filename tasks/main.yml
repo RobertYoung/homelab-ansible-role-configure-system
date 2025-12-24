@@ -1,0 +1,26 @@
+---
+- name: Include update packages tasks
+  ansible.builtin.include_tasks: update-packages.yml
+  tags:
+    - configure_system
+    - packages
+    - updates
+
+- name: Include install packages tasks
+  ansible.builtin.include_tasks: install-packages.yml
+  tags:
+    - configure_system
+    - packages
+
+- name: Include configure hostname tasks
+  ansible.builtin.include_tasks: hostname.yml
+  when: configure_system_hostname is defined
+  tags:
+    - configure_system
+    - hostname
+
+- name: Include system maintenance tasks
+  ansible.builtin.include_tasks: system.yml
+  tags:
+    - configure_system
+    - maintenance
