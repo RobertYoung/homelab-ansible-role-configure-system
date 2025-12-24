@@ -1,0 +1,31 @@
+---
+- name: Validate hostname variable is defined
+  ansible.builtin.assert:
+    that:
+      - configure_system_hostname is defined
+      - configure_system_hostname | length > 0
+    fail_msg: "configure_system_hostname must be defined and not empty"
+
+- name: Set hostname using hostname module
+  become: true
+  ansible.builtin.hostname:
+    name: "{{ configure_system_hostname }}"
+
+- name: Ensure /etc/hostname is configured
+  become: true
+  ansible.builtin.copy:
+    content: "{{ configure_system_hostname }}\n"
+    dest: /etc/hostname
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Ensure /etc/hosts is configured
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: '^127\.0\.1\.1\s+'
+    line: "127.0.1.1 {{ configure_system_hostname }}"
+    owner: root
+    group: root
+    mode: "0644"

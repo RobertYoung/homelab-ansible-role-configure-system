@@ -1,0 +1,28 @@
+---
+- name: Update apt-get repo and cache
+  become: true
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Upgrade all packages on servers
+  become: true
+  ansible.builtin.apt:
+    upgrade: safe
+    force_apt_get: true
+
+- name: Check if reboot is necessary
+  ansible.builtin.stat:
+    path: /var/run/reboot-required
+  register: reboot_required
+
+- name: Reboot
+  become: true
+  ansible.builtin.reboot:
+    msg: Rebooting machine
+    connect_timeout: 5
+    reboot_timeout: 300
+    pre_reboot_delay: 0
+    post_reboot_delay: 30
+  when:
+    - reboot_required.stat.exists
+    - configure_system_reboot_after_update | bool

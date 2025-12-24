@@ -1,0 +1,16 @@
+---
+# Handlers for configure-system role
+
+- name: restart systemd-journald
+  become: true
+  ansible.builtin.systemd:
+    name: systemd-journald
+    state: restarted
+
+- name: restart docker
+  become: true
+  ansible.builtin.systemd:
+    name: docker
+    state: restarted
+  failed_when: false
+  when: ansible_facts.services['docker.service'] is defined

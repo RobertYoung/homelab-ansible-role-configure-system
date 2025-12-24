@@ -1,0 +1,42 @@
+---
+# Systemd Journal Configuration
+- name: Configure systemd journal retention
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/journald.conf
+    regexp: "^#?MaxRetentionSec="
+    line: "MaxRetentionSec={{ configure_system_journal_retention_days }}day"
+    state: present
+  notify: restart systemd-journald
+
+- name: Vacuum systemd journal logs
+  become: true
+  ansible.builtin.command:
+    cmd: journalctl --vacuum-time={{ configure_system_journal_retention_days }}d
+  register: journal_vacuum_result
+  changed_when: "'Vacuuming done' in journal_vacuum_result.stdout"
+
+# Logrotate Configuration
+- name: Ensure logrotate is installed
+  become: true
+  ansible.builtin.apt:
+    name: logrotate
+    state: present
+
+- name: Force logrotate run
+  become: true
+  ansible.builtin.command:
+    cmd: logrotate -f /etc/logrotate.conf
+  register: logrotate_result
+  changed_when: logrotate_result.rc == 0
+  failed_when: logrotate_result.rc not in [0, 1]
+
+# Clean up /tmp directory
+- name: Clean up files in /tmp older than specified days
+  become: true
+  ansible.builtin.cron:
+    name: "Clean tmp files"
+    hour: "2"
+    minute: "30"
+    job: "find /tmp -type f -mtime +{{ configure_system_tmp_cleanup_days }} -delete"
+    state: present

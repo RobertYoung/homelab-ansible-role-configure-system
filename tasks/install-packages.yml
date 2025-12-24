@@ -1,0 +1,14 @@
+---
+- name: Install apt packages
+  ansible.builtin.apt:
+    name:
+      - curl
+      - gpg
+      - net-tools
+      - acl
+      - vim
+      - git
+      - htop
+      - nfs-common
+    state: present
+  become: true
