@@ -1,13 +1,13 @@
 ---
 # Handlers for configure-system role
 
-- name: restart systemd-journald
+- name: Restart systemd-journald
   become: true
   ansible.builtin.systemd:
     name: systemd-journald
     state: restarted
 
-- name: restart docker
+- name: Restart docker
   become: true
   ansible.builtin.systemd:
     name: docker

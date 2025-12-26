@@ -7,7 +7,7 @@
     regexp: "^#?MaxRetentionSec="
     line: "MaxRetentionSec={{ configure_system_journal_retention_days }}day"
     state: present
-  notify: restart systemd-journald
+  notify: Restart systemd-journald
 
 - name: Vacuum systemd journal logs
   become: true
