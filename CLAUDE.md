@@ -12,25 +12,41 @@ Ansible role for configuring homelab systems. Handles package management, hostna
 # Lint YAML files
 yamllint .
 
+# Run Ansible lint
+ansible-lint
+
 # Run pre-commit hooks
 pre-commit run --all-files
 
+# Molecule testing
+molecule test          # Run full test suite
+molecule converge      # Apply role to test container
+molecule verify        # Run verification only
+molecule login         # Access container for debugging
+molecule destroy       # Clean up test containers
+
 # Test role locally (example playbook)
 ansible-playbook -i inventory playbook.yml --tags configure_system
+```
+
+## Tool Management
+
+This project uses [mise](https://mise.jdx.dev/) for tool version management:
+```bash
+mise install           # Install required tools
 ```
 
 ## Architecture
 
 **Task execution order** (defined in `tasks/main.yml`):
 1. `update-packages.yml` - apt cache update, safe upgrade, conditional reboot
-2. `install-packages.yml` - installs base + version-specific + custom packages
+2. `install-packages.yml` - installs packages from `configure_system_base_packages`
 3. `hostname.yml` - sets hostname (only if `configure_system_hostname` is defined)
 4. `system.yml` - journald retention, logrotate, /tmp cleanup cron
 
-**Version-specific packages** are handled via vars files:
-- `vars/main.yml` - base packages for all systems
-- `vars/Debian-11.yml`, `vars/Debian-12.yml`, `vars/Debian-13.yml` - version-specific packages
-- The task uses `include_vars` with `with_first_found` to load `{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml`
+**Variables**:
+- `vars/main.yml` - base packages list for all systems
+- `defaults/main.yml` - configurable role defaults
 
 **Tags for selective execution:**
 - `configure_system` - all tasks
@@ -39,9 +55,21 @@ ansible-playbook -i inventory playbook.yml --tags configure_system
 - `hostname` - hostname only
 - `maintenance` - system maintenance only
 
+## YAML Style
+
+- Maximum line length: 120 characters
+- Truthy values: use `true`/`false` or `yes`/`no`
+- Minimum 1 space after comment markers
+
 ## Commit Convention
 
 Uses conventional commits with semantic-release:
-- `feat:` → minor version
-- `fix:`, `perf:`, `revert:`, `docs:`, `refactor:` → patch version
-- `BREAKING CHANGE:` in body → major version
+- `feat:` - New feature (minor version bump)
+- `fix:` - Bug fix (patch version bump)
+- `docs:` - Documentation changes (patch version bump)
+- `refactor:` - Code refactoring (patch version bump)
+- `perf:` - Performance improvements (patch version bump)
+- `test:` - Adding or updating tests (no release)
+- `ci:` - CI/CD changes (no release)
+- `chore:` - Maintenance tasks (no release)
+- `BREAKING CHANGE:` in body - Major version bump

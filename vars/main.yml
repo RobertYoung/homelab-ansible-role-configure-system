@@ -1,0 +1,11 @@
+---
+# Base packages to install on all systems
+configure_system_base_packages:
+  - curl
+  - gpg
+  - net-tools
+  - acl
+  - vim
+  - git
+  - htop
+  - nfs-common

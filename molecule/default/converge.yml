@@ -1,0 +1,9 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+  vars:
+    configure_system_hostname: "test-host"
+    configure_system_reboot_after_update: false
+  roles:
+    - role: robertyoung.configure_system
