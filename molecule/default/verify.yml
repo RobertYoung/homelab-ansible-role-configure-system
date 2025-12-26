@@ -1,0 +1,60 @@
+---
+- name: Verify
+  hosts: all
+  become: true
+  gather_facts: true
+  tasks:
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+        manager: auto
+
+    - name: Assert required packages are installed
+      ansible.builtin.assert:
+        that:
+          - "'curl' in ansible_facts.packages"
+          - "'vim' in ansible_facts.packages"
+          - "'git' in ansible_facts.packages"
+          - "'htop' in ansible_facts.packages"
+        fail_msg: "Required packages are not installed"
+        success_msg: "Required packages are installed"
+
+    - name: Check hostname is set
+      ansible.builtin.command: hostname
+      register: hostname_result
+      changed_when: false
+
+    - name: Assert hostname is correct
+      ansible.builtin.assert:
+        that:
+          - hostname_result.stdout == "test-host"
+        fail_msg: "Hostname is not set correctly"
+        success_msg: "Hostname is set correctly"
+
+    - name: Check /etc/hostname content
+      ansible.builtin.slurp:
+        src: /etc/hostname
+      register: etc_hostname
+
+    - name: Assert /etc/hostname contains correct hostname
+      ansible.builtin.assert:
+        that:
+          - "'test-host' in (etc_hostname.content | b64decode)"
+        fail_msg: "/etc/hostname does not contain correct hostname"
+        success_msg: "/etc/hostname contains correct hostname"
+
+    - name: Gather service facts
+      ansible.builtin.service_facts:
+
+    - name: Assert systemd-journald service exists
+      ansible.builtin.assert:
+        that:
+          - "'systemd-journald.service' in ansible_facts.services"
+        fail_msg: "systemd-journald service is not recognized"
+        success_msg: "systemd-journald service is recognized"
+
+    - name: Check logrotate is installed
+      ansible.builtin.assert:
+        that:
+          - "'logrotate' in ansible_facts.packages"
+        fail_msg: "logrotate is not installed"
+        success_msg: "logrotate is installed"
